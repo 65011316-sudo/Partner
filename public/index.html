@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Partner check</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🔎 Partner check</span></h1>
+    <p class="muted">
+      Upload your report (PDF with comment). The website parses 8 keywords, counts URLs, and find negative story autometically.
+    </p>
+
+    <section class="card">
+      <h2>1) Upload report</h2>
+      <input id="file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+      <div class="actions">
+        <button id="analyzeBtn">Analyze</button>
+        <button id="exportBtn" class="secondary">Export Excel</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2) Summary</h2>
+      <table id="summaryTable">
+        <thead>
+          <tr><th>Keyword</th><th>Total URLs</th><th>Negative Found</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+     <!-- <pre id="raw" class="muted">No results yet.</pre> -->
+    </section>
+  </div>
+
+  <!-- Loader popup -->
+  <div id="loader" class="overlay">
+    <div class="box">
+      <div class="spin"></div>
+      <div><b>Analyzing…</b></div>
+    </div>
+  </div>
+
+  <!--โหลดสคริปต์แค่ครั้งเดียว -->
+  <script src="app.js" defer></script> 
+</body>
+</html>
+
