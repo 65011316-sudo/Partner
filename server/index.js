@@ -76,22 +76,40 @@ app.post('/analyze-report', upload.single('file'), async (req, res) => {
     }
 });
 
+// --- export excel ---
 app.post('/export-excel', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ ok: false, error: 'No file uploaded' });
+
+        // 1) ไฟล์ -> ข้อความ
         const text = await readReportText(req.file.path, req.file.mimetype, req.file.originalname);
+
+        // 2) ข้อความ -> entries (array)
         const entries = parseReportEntries(text);
-        const buf = await makeExcel(entries, path.parse(req.file.originalname).name);
+
+        // 3) วิเคราะห์ลิงก์เพื่อเติม finding/note
+        const analyzed = await analyzeEntries(entries);
+
+        // ป้องกันพลาด: ต้องเป็น array เท่านั้น
+        if (!Array.isArray(analyzed)) {
+            console.error('Export error: analyzed is not array', typeof analyzed, analyzed && Object.keys(analyzed));
+            return res.status(500).json({ ok: false, error: 'entries is not an array' });
+        }
+
+        // 4) ทำไฟล์ Excel จาก “อาร์เรย์ของรายการที่วิเคราะห์แล้ว”
+        const filename = path.parse(req.file.originalname).name;
+        const buf = await makeExcel(analyzed, filename);
 
         fs.unlink(req.file.path, () => { });
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', `attachment; filename=${path.parse(req.file.originalname).name.replace(/\s+/g, '_')}_Check.xlsx`);
+        res.setHeader('Content-Disposition', `attachment; filename="${filename.replace(/\s+/g, '_')}_Check.xlsx"`);
         res.send(buf);
     } catch (e) {
         console.error('Export error:', e);
         res.status(500).json({ ok: false, error: e.message || 'Export failed' });
     }
 });
+
 
 // ✅ start server
 app.listen(PORT, '0.0.0.0', () => {
